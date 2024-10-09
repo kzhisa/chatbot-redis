@@ -1,0 +1,41 @@
+@localhost = localhost:8880
+
+###
+POST http://{{localhost}}/chat HTTP/1.1
+Content-Type: application/json
+
+{
+    "session_id": "test_session_1",
+    "message": "こんにちは。私はネコを飼っています。ペットの名前はキキです。きれいな黒猫です。"
+}
+
+
+###
+POST http://{{localhost}}/chat HTTP/1.1
+Content-Type: application/json
+
+{
+    "session_id": "test_session_1",
+    "message": "私のペットを呼んでもらえますか？"
+}
+
+
+###
+POST http://{{localhost}}/chat HTTP/1.1
+Content-Type: application/json
+
+{
+    "session_id": "test_session_1",
+    "message": "私のペットの色は？"
+}
+
+
+###
+POST http://{{localhost}}/chat HTTP/1.1
+Content-Type: application/json
+
+{
+    "session_id": "test_session_1",
+    "message": "私のペットの鳴き声は？"
+}
+
