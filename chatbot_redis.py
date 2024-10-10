@@ -1,15 +1,16 @@
 import os
 import uuid
+import time
 import redis
 import json
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from langchain_community.chat_message_histories import ChatMessageHistory
+
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 from langchain_redis import RedisChatMessageHistory
 
 app = FastAPI()
@@ -17,13 +18,10 @@ app = FastAPI()
 # Redis設定
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
-# 会話履歴数
-DEFAULT_MAX_MESSAGES = 4
-
 # Langchain
 unique_id = uuid.uuid4().hex[0:8]
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = f"Tracing Chatbot with FastAPI - {unique_id}"
+os.environ["LANGCHAIN_PROJECT"] = f"Tracing Chatbot with Redis - {unique_id}"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 LANGCHAIN_API_KEY = os.getenv('LANGCHAIN_API_KEY')
 
@@ -31,7 +29,8 @@ LANGCHAIN_API_KEY = os.getenv('LANGCHAIN_API_KEY')
 def get_message_history(session_id: str) -> BaseChatMessageHistory:
     return RedisChatMessageHistory(
         session_id,
-        redis_url=REDIS_URL
+        redis_url=REDIS_URL,
+        ttl=600
     )
 
 # プロンプトテンプレートで会話履歴を追加
@@ -50,7 +49,7 @@ async def chat(request: Request):
     input_message = body.get("message")
 
     # LLM
-    chat_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.5)
+    chat_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.3)
 
     # Runnableの準備
     runnable = prompt_template | chat_model
@@ -68,6 +67,9 @@ async def chat(request: Request):
         {"input": input_message},
         config={"configurable": {"session_id": session_id}}
     )
+
+    # Sleep - 2秒停止
+    time.sleep(2)
 
     # 応答をJSON形式で返す
     return JSONResponse({"answer": response.content})

@@ -18,7 +18,7 @@ DEFAULT_MAX_MESSAGES = 10
 # Langchain
 unique_id = uuid.uuid4().hex[0:8]
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = f"Tracing Chatbot with FastAPI - {unique_id}"
+os.environ["LANGCHAIN_PROJECT"] = f"Tracing Simple Chatbot - {unique_id}"
 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
 LANGCHAIN_API_KEY = os.getenv('LANGCHAIN_API_KEY')
 
@@ -70,7 +70,7 @@ async def chat(request: Request):
     input_message = body.get("message")
 
     # LLM
-    chat_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.5)
+    chat_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.3)
 
     # Runnableの準備
     runnable = prompt_template | chat_model
